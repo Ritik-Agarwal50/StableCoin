@@ -13,6 +13,7 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__NotAllowedToken();
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
+    error DSCEngine__MintFailed();
 
     mapping(address token => address priceFeed) private s_priceFeeds;
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
@@ -50,7 +51,7 @@ contract DSCEngine is ReentrancyGuard {
         }
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddress[i];
-            s_collateralTokens.push(tokenAddresses[i]);
+            s_collateralTokens.push(tokenAddresses[i]);    
         }
         i_dsc = DecentralizedStableCoin(dscAddress);
     }
@@ -91,6 +92,11 @@ contract DSCEngine is ReentrancyGuard {
         //mint DSC
         s_DSCMinted[msg.sender] += amountDscToMint;
         _revertIfHealthFactorIsBroken(msg.sender);
+        bool minted = i_dsc.mint(msg.sender, amountDscToMint); 
+        if(!minted){
+            revert DSCEngine__MintFailed();
+        }
+
     }
 
     function liquidate() external {}
