@@ -14,7 +14,8 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
     error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
     error DSCEngine__MintFailed();
-    error DSCEngine__HealthFactorOK();  
+    error DSCEngine__HealthFactorOK(); 
+    error DSCEngine__HealthFactorNotImproved(); 
 
     mapping(address token => address priceFeed) private s_priceFeeds;
 
@@ -107,12 +108,7 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     function burnDsc(uint256 amount) public moreThanZero(amount) {
-        s_DSCMinted[msg.sender] -= amount;
-        bool success = i_dsc.transferFrom(msg.sender, address(this), amount);
-        if (!success) {
-            revert DSCEngine__TransferFailed();
-        }
-        i_dsc.burn(amount);
+        _burnDsc(amount, msg.sender,msg.sender);
         _revertIfHealthFactorIsBroken(msg.sender); //i dont think it will ever get triigger.
     }
 
@@ -155,6 +151,12 @@ contract DSCEngine is ReentrancyGuard {
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
         uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
         _redeemCollateral(collateral,totalCollateralToRedeem,user,msg.sender);
+        _burnDsc(debtToCover,user,msg.sender);
+        uint256 endingUserHealthFactoe = _healthFactor(user);
+        if(endingUserHealthFactoe <= startinfUserHealthFactor){
+            revert DSCEngine__HealthFactorNotImproved();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
 
     }
 
