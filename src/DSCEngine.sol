@@ -175,7 +175,6 @@ contract DSCEngine is ReentrancyGuard {
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
     }
 
-    function getHealthFactor() external view {}
 
     function _getAccountInformation(address user)
         private
@@ -223,5 +222,8 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__TransferFailed();
         }
         i_dsc.burn(amountDscToBurn);   
+    }
+    function getHealthFactor(address user) external view  returns{uint256}{
+        return _healthFactor(user);
     }
 }
