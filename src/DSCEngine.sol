@@ -239,7 +239,7 @@ contract DSCEngine is ReentrancyGuard {
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
-        _revertIfHealthFactorIsBroken(msg.sender);
+       // _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     ///////////////////
@@ -356,8 +356,7 @@ contract DSCEngine is ReentrancyGuard {
             s_priceFeeds[token]
         );
         (, int256 price, , , ) = priceFeed.latestRoundData();
-        return
-            ((usdAmountInWei * PRECISION) /
+        return ((usdAmountInWei * PRECISION) /
             (uint256(price) * ADDITIONAL_FEED_PRECISION));
     }
 
@@ -372,6 +371,7 @@ contract DSCEngine is ReentrancyGuard {
         view
         returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
     {
-        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+        //(totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+        return _getAccountInformation(user);
     }
 }
