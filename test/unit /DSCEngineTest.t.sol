@@ -23,6 +23,7 @@ contract DSCEngineTest is Test {
     //address public user = address(1);
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_USER_BALANCE = 10 ether;
+    uint256 public amountToMint = 100 ether;
 
     function setUp() public {
         deployer = new DeployDSC();
@@ -108,8 +109,30 @@ contract DSCEngineTest is Test {
         );
         assertEq(totalDscMinted, 0);
         assertEq(expectedDepositedAmount, AMOUNT_COLLATERAL);
-        console.log("totalDscMinted", totalDscMinted);
-        console.log("expected Depo  amount", expectedDepositedAmount);
-        console.log("Amount Collateral", AMOUNT_COLLATERAL);
+        // console.log("totalDscMinted", totalDscMinted);
+        //console.log("expected Depo  amount", expectedDepositedAmount);
+        //console.log("Amount Collateral", AMOUNT_COLLATERAL);
+    }
+
+    // function testBurnDsc() public {
+    //     uint256 dscAmount = 10e18;
+    //     vm.startPrank(user);
+    //    // vm.expectRevert(DSCEngine.DSCEngine__NeedMoreThanZero.selector);
+    //     dsce.burnDsc(dscAmount);
+    //     vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
+    //     vm.stopPrank();
+    // }
+
+    function testRevertIfBurnAmountIsZero() public {
+        vm.startPrank(user);
+        ERC20Mock(weth).approve(address(dsce), AMOUNT_COLLATERAL);
+        dsce.depositeCollateralAndMintDsc(
+            weth,
+            AMOUNT_COLLATERAL,
+            amountToMint
+        );
+        vm.expectRevert(DSCEngine.DSCEngine__NeedMoreThanZero.selector);
+        dsce.burnDsc(0);
+        vm.stopPrank();
     }
 }

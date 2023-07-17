@@ -239,7 +239,7 @@ contract DSCEngine is ReentrancyGuard {
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
-       // _revertIfHealthFactorIsBroken(msg.sender);
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     ///////////////////
@@ -279,6 +279,7 @@ contract DSCEngine is ReentrancyGuard {
             address(this),
             amountDscToBurn
         );
+        //hypo not reachable
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
