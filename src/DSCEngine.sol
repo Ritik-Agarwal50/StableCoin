@@ -239,7 +239,7 @@ contract DSCEngine is ReentrancyGuard {
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
-       // _revertIfHealthFactorIsBroken(msg.sender);
+        // _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     ///////////////////
@@ -306,10 +306,21 @@ contract DSCEngine is ReentrancyGuard {
             uint256 totalDscMinted,
             uint256 collateralValueInUsd
         ) = _getAccountInformation(user);
-        uint256 collateralAdjustedThreshold = (collateralValueInUsd *
-            LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        return (collateralAdjustedThreshold * PRECISION) / totalDscMinted;
+        // uint256 collateralAdjustedThreshold = (collateralValueInUsd *
+        //     LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        // return (collateralAdjustedThreshold * PRECISION) / totalDscMinted;
+        return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
         //return collateralValueInUsd / totalDscMinted;
+    }
+
+    function _calculateHealthFactor(
+        uint256 totalDscMinted,
+        uint256 collateralValueInUsd
+    ) internal pure returns (uint256) {
+        if (totalDscMinted == 0) return type(uint256).max;
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd *
+            LIQUIDATION_THRESHOLD) / 100;
+        return (collateralAdjustedForThreshold * 1e18) / totalDscMinted;
     }
 
     function getUsdValue(
