@@ -28,7 +28,12 @@ contract Handler is Test {
         ERC20Mock collateral = _getCollateeralFromSeed(collateralSeed);
 
         amountCollateral = bound(amountCollateral, 1, MAX_DEPOSITE_SIZE);
+
+        vm.startPrank(msg.sender);
+        collateral.mint(msg.sender, amountCollateral);
+        collateral.approve(address(dsce), amountCollateral);
         dsce.depositeCollateral(address(collateral), amountCollateral);
+        vm.stopPrank();
     }
 
     function _getCollateeralFromSeed(
