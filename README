@@ -1,1 +1,10 @@
 
+BOUND is a function of STD utils  which help us to bound the result to an amount
+
+```
+bound(amountCollateral, 1, MAX_DEPOSITE_SIZE);
+
+```
+1st args = whom it will bound, so its amount collateral
+2nd args = starting range
+3rd args = end range. 
