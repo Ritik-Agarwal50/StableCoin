@@ -27,7 +27,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
+import {Oraclelib} from "./libraries/Oraclelib.sol";
 contract DSCEngine is ReentrancyGuard {
     error DSCEngine__NeedMoreThanZero();
     error DSCEngine__TokenAddressAndPriceFeedAddressMustBeSameLength();
@@ -37,6 +37,9 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOK();
     error DSCEngine__HealthFactorNotImproved();
+
+    ///type//// @dev 
+    using Oraclelib for AggregatorV3Interface;
 
     DecentralizedStableCoin private immutable i_dsc;
 
@@ -330,7 +333,7 @@ contract DSCEngine is ReentrancyGuard {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
             s_priceFeeds[token]
         );
-        (, int256 price, , , ) = priceFeed.latestRoundData();
+        (, int256 price, , , ) = priceFeed.staleCheckLatestRoundData();
         return
             ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
     }
@@ -367,7 +370,7 @@ contract DSCEngine is ReentrancyGuard {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
             s_priceFeeds[token]
         );
-        (, int256 price, , , ) = priceFeed.latestRoundData();
+        (, int256 price, , , ) = priceFeed.staleCheckLatestRoundData();
         return ((usdAmountInWei * PRECISION) /
             (uint256(price) * ADDITIONAL_FEED_PRECISION));
     }
@@ -407,5 +410,11 @@ contract DSCEngine is ReentrancyGuard {
         address token
     ) external view returns (uint256) {
         return s_collateralDeposited[user][token];
+    }
+
+    function getCollateralTokenPriceFeed(
+        address token
+    ) external view returns (address) {
+        return s_priceFeeds[token];
     }
 }
